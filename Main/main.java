@@ -20,7 +20,7 @@ public class main extends JFrame{
         URL Mainimage = this.getClass().getResource("image/Hero.png");
         Image M_image = new ImageIcon(Mainimage).getImage();
 
-        URL Bossimage = this.getClass().getResource("image/Boss.png");
+        URL Bossimage = this.getClass().getResource("image/mage_guardian_blue.gif");
         Image Boss_image = new ImageIcon(Bossimage).getImage();
 
 
