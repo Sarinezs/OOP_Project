@@ -2,9 +2,12 @@ import java.awt.*;
 import java.net.*;
 import javax.swing.*;
 
+import Entity.Player;
+import image_insert.insert;
+
+// import image_insert.insert;
 
 public class main extends JFrame{
-    JLabel name = new JLabel("suriya");
 
     
     main(){
@@ -14,15 +17,8 @@ public class main extends JFrame{
     }
 
     public class drawimage extends JPanel{
-        URL Backgroundimage = this.getClass().getResource("image/background.png");
+        URL Backgroundimage = this.getClass().getResource("Entity/image/background.png");
         Image B_image = new ImageIcon(Backgroundimage).getImage();
-
-        URL Mainimage = this.getClass().getResource("image/Hero.png");
-        Image M_image = new ImageIcon(Mainimage).getImage();
-
-        URL Bossimage = this.getClass().getResource("image/mage_guardian_blue.gif");
-        Image Boss_image = new ImageIcon(Bossimage).getImage();
-
 
         drawimage(){
 
@@ -32,8 +28,13 @@ public class main extends JFrame{
         public void paintComponent(Graphics g){
             super.paintComponent(g);
             g.drawImage(B_image,0,0,getWidth(),getHeight(),this);
-            g.drawImage(M_image,0,410,380,200,this);
-            g.drawImage(Boss_image,500,190,800,534,this);
+            // g.drawImage(M_image,0,410,380,200,this);
+            // g.drawImage(Boss_image,400,190,800,534,this);
+            Player Hero = new Player();
+            Hero.draw(g);
+            insert a = new insert();
+            a.draw(g);
+
         }
         
     }
@@ -44,8 +45,7 @@ public class main extends JFrame{
         frame.setSize(1280, 720);
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setFocusable(true);
-
-        // GamePanel gamepanel = new GamePanel();
+        System.out.println();
         frame.setVisible(true);
     }
 }
