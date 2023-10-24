@@ -10,7 +10,7 @@ public class Player{
     public int run_count;
     public int attack_count;
     public ImageIcon[] P_idle = new ImageIcon[8];
-    public ImageIcon[] P_run = new ImageIcon[9];
+    public ImageIcon[] P_run = new ImageIcon[10];
     public ImageIcon[] P_attack = new ImageIcon[8];
 
     public ImageIcon p_test;
