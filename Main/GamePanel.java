@@ -15,7 +15,11 @@ public class GamePanel extends JPanel implements ActionListener{
     Player p = new Player();
     boolean iswalk = false;
     boolean isattack = false;
+    boolean isblock = false;
     boolean isidle = true;
+    boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
+
+    Death_Bringer d = new Death_Bringer();
 
     Thread actortime = new Thread(new Runnable() {
        public void run(){
@@ -25,6 +29,8 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             catch(Exception e){}
             p.idle_count++;
+            d.idle_count++;
+            d.attack_count++;
             repaint();
             
         }
@@ -59,34 +65,60 @@ public class GamePanel extends JPanel implements ActionListener{
                     p.attack_count = 0;
                     isidle = true;
                     isattack = false;
+                    isaction = false;
                 }
             }
         }
     });
 
+    Thread Block = new Thread(new Runnable() {
+       public void run(){
+        while(true){
+            try{
+                Thread.sleep(100);
+            }
+            catch(Exception e){}
+            if(isblock){
+                p.block_count++;
+                repaint();
+            }
+            if(p.block_count >= 8){
+                p.block_count = 0;
+            }
+        }
+       } 
+    });
+
     public GamePanel(){
+        d.x = 500;
+
         this.setFocusable(true);
         this.setLayout(null);
 
         this.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e){
-                iswalk = true;
-                int a = e.getKeyCode();
-                if(a == KeyEvent.VK_A){
-                    p.x -= 5;
-                    p.run_count++;
+                if(isaction != true || iswalk == true){
+                    iswalk = true;
+                    isaction = true;
+                    int a = e.getKeyCode();
+                    if(a == KeyEvent.VK_A){
+                        p.x -= 10;
+                        p.run_count++;
+                    }
+                    else if(a == KeyEvent.VK_D){
+                        p.x += 10;
+                        p.run_count++;
+                    }
+                    if(p.run_count >= 9){
+                        p.run_count = 0;
+                    }
                 }
-                else if(a == KeyEvent.VK_D){
-                    p.x += 5;
-                    p.run_count++;
-                }
-                if(p.run_count >= 9){
-                    p.run_count = 0;
-                }
+                
             }
 
             public void keyReleased(KeyEvent e){
                 iswalk = false;
+                isaction = false;
                 p.run_count = 0;
                 
                 
@@ -95,20 +127,43 @@ public class GamePanel extends JPanel implements ActionListener{
 
         this.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e){
-                isattack = true;
-                isidle = false;
+                if(e.getButton() == MouseEvent.BUTTON1){
+                    if(isaction != true){ // can't attack during guarding
+                        isattack = true;
+                        isidle = false;
+                        isaction = true;
+                    }
+                    
+                }
             }
 
-            // public void mouseReleased(MouseEvent e){ // bolck
-            //     isattack = false;
-            //     isidle = true;
-            //     p.attack_count = 0;
-            // }
+            public void mousePressed(MouseEvent e){ // guarding
+                if(e.getButton() == MouseEvent.BUTTON3){
+                    if(isaction != true){
+                        isblock = true;
+                        isidle = false;
+                        isaction = true;
+                    }
+                    
+                }
+            }
+
+            public void mouseReleased(MouseEvent e){ 
+                if(e.getButton() == MouseEvent.BUTTON3){
+                    if(isaction != true || isblock == true){
+                        isblock = false;
+                        isidle = true;
+                        isaction = false;
+                    }
+                    
+                }
+            }
         });
         
         time.start();
         actortime.start();
         attack.start();
+        Block.start();
     }
 
     public void paintComponent(Graphics g){
@@ -123,18 +178,22 @@ public class GamePanel extends JPanel implements ActionListener{
                 p.idle_count = 0;
             }
             g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
+            
         }
 
         if(isattack){
             g.drawImage(p.P_attack[p.attack_count].getImage(), p.x, 440, 300, 165, this);
             
         }
-        else{
-            // if(p.idle_count >= 8){
-            //     p.idle_count = 0;
-            // }
-            // g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
+        if(isblock){
+            g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
         }
+
+        if(d.attack_count >= 10){
+                d.attack_count = 0;
+            }
+            // g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
+            g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
 
     }
 
