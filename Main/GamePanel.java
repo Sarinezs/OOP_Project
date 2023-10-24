@@ -16,7 +16,7 @@ public class GamePanel extends JPanel implements ActionListener{
        public void run(){
         while(true){
             try{
-                Thread.sleep(80);
+                Thread.sleep(100);
             }
             catch(Exception e){}
             p.idle_count++;
@@ -55,7 +55,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        if(p.idle_count == 8){
+        if(p.idle_count >= 8){
             p.idle_count = 0;
         }
         g.drawImage(bgimg.getImage(), 0, 0, getWidth(), getHeight(), this);
