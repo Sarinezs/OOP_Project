@@ -1,4 +1,4 @@
-package test;
+package Screen.test;
 import java.awt.image.BufferedImage;
 
 public class Entity {

@@ -1,4 +1,4 @@
-package test;
+package Screen.test;
 // package entity;
 
 import java.awt.Color;
