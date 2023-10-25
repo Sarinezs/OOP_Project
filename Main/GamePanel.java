@@ -23,6 +23,7 @@ public class GamePanel extends JPanel implements ActionListener{
     Death_Bringer d = new Death_Bringer();
     boolean isbossattack = false;
     boolean isbossaction = false;
+    boolean isbossidle = true;
     int Boss_delay = -1;
 
     Thread actortime = new Thread(new Runnable() {
@@ -50,6 +51,7 @@ public class GamePanel extends JPanel implements ActionListener{
                 if((d.x - p.x) <= 100){
                     isbossattack = true;
                     isbossaction = true;
+                    isbossidle = false;
                     // if(isbossattack && Boss_delay < 0){
                     //     d.attack_count++;
                     //     if(d.attack_count >= 10){
@@ -60,7 +62,9 @@ public class GamePanel extends JPanel implements ActionListener{
 
                 }
                 else{
+                    isbossidle = true;
                     d.idle_count++;
+
                 }
                 repaint();
             }
@@ -74,7 +78,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     if(isbossattack && Boss_delay < 0){
                         d.attack_count++;
                         if(d.attack_count >= 10){
-                            Boss_delay = 5;
+                            Boss_delay = 20;
                             isbossattack = false;
                         }
                     }
@@ -92,10 +96,23 @@ public class GamePanel extends JPanel implements ActionListener{
     Thread delay = new Thread(new Runnable() {
         public void run(){
             while(true){
+                // isbossidle = true;
                 if(Boss_delay >= 0){
-                    d.idle_count++;
-                    Boss_delay -= 1;
-                    repaint();
+                    if((d.x - p.x) > 100){ //ถ้ายังอยู่ในระยะboss ** กันเฟรมมันรันเร็ว
+                        Boss_delay -= 1;
+                        repaint();
+                    }
+                    else{// ถ้าไม่ได้อยู่ในระยะboss
+                        d.idle_count++;
+                        Boss_delay -= 1;
+                        repaint();
+                    }
+                    
+                }
+                else if((d.x - p.x) <= 100){ // ถ้า
+                    isbossattack = true;
+                    isbossaction = true;
+                    isbossidle = false;
                 }
                 // if(isbossaction){
                 //     if(isbossattack && Boss_delay < 0){
@@ -296,13 +313,16 @@ public class GamePanel extends JPanel implements ActionListener{
         if(isblock){
             g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
         }
-        if((d.x - p.x) <= 100){
+
+
+        if((d.x - p.x) <= 100){// เมื่อเข้ามาในระยะ boss จะโจมตี
             
             if(Boss_delay >= 0){
                 if(d.idle_count >= 8){
                     d.idle_count = 0;
                 }
-                g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
+                isbossidle = true;
+                // g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
             }
             else{
                 if(d.attack_count >= 10){
@@ -311,13 +331,13 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
             }
         }
-        else{
+        if(isbossidle){
             if(d.idle_count >= 8){
                 d.idle_count = 0;
             }
             g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
         }
-        if(isbossattack){
+        if(isbossattack){// ถ้าboss อยู่ในช่วงโจมตี จะทำการโจมตีให้จบอนิเมชั่น
             if((d.x - p.x) > 100){
                 if(d.attack_count >= 10){
                     d.attack_count = 0;
