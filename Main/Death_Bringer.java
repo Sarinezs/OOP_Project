@@ -1,9 +1,9 @@
 import javax.swing.ImageIcon;
 
-public class Death_Bringer {
-    public int HP;
-    public int ATK;
-    public int x;
+public class Death_Bringer  extends Entity{
+    // public int HP;
+    // public int ATK;
+    // public int x;
     public int idle_count;
     public int run_count;
     public int attack_count;

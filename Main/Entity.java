@@ -1,9 +1,7 @@
 public class Entity {
-    int hp;
-    int atk;
+    public int HP;
+    public int ATK;
+    public int x;
 
 }
 
-class Hero extends Entity{
-
-}

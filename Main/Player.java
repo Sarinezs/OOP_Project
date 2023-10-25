@@ -2,10 +2,10 @@
 
 import javax.swing.ImageIcon;
 
-public class Player{
-    public int HP;
-    public int ATK;
-    public int x;
+public class Player extends Entity{
+    // public int HP;
+    // public int ATK;
+    // public int x;
     public int idle_count;
     public int run_count;
     public int attack_count;
