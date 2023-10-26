@@ -1,4 +1,6 @@
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,20 +13,34 @@ import javax.swing.*;
 
 public class GamePanel extends JPanel implements ActionListener{
     public ImageIcon bgimg = new ImageIcon(this.getClass().getResource("Entity/Image/background.png"));
-    // public ImageIcon heroimg = new ImageIcon(this.getClass().getResource("Entity/Image/Hero/Idle/HeroKnight_Idle_0.png"));
+
+    
+    
     Player p = new Player();
+    
     boolean iswalk = false;
     boolean isattack = false;
     boolean isblock = false;
-    boolean isidle = true;
+    boolean ishurt = false;
+    boolean isdeath = false;
+    boolean isroll = false;
     boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
+    boolean isidle = true;
     
 
     Death_Bringer d = new Death_Bringer();
     boolean isbossattack = false;
     boolean isbossaction = false;
+    boolean isbosswalk = false;
     boolean isbossidle = true;
+    boolean willcontinue = false;
+    int Boss_atk_range = 0;
+    int Boss_vision = 30;
     int Boss_delay = -1;
+
+    JLabel P_HP = new JLabel(String.valueOf(p.HP));
+    JLabel D_HP = new JLabel(String.valueOf(d.HP));
+
 
     Thread actortime = new Thread(new Runnable() {
        public void run(){
@@ -35,7 +51,7 @@ public class GamePanel extends JPanel implements ActionListener{
             catch(Exception e){}
             p.idle_count++;
           
-            repaint();
+            // repaint();
             
         }
        } 
@@ -48,25 +64,39 @@ public class GamePanel extends JPanel implements ActionListener{
                     Thread.sleep(100);
                 }
                 catch(Exception e){}
-                if((d.x - p.x) <= 100){
+                if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
                     isbossattack = true;
                     isbossaction = true;
                     isbossidle = false;
-                    // if(isbossattack && Boss_delay < 0){
-                    //     d.attack_count++;
-                    //     if(d.attack_count >= 10){
-                    //         Boss_delay = 5;
-                    //         isbossattack = false;
-                    //     }
-                    // }
-
+                    isbosswalk = false;
+                   
                 }
+                else if((d.x - p.x) <= Boss_vision && !isbossattack && p.HP > 0){
+                    isbosswalk = true;
+                    isbossidle = false;
+                    isbossaction = true;
+                    if(d.x > Boss_vision){
+                        d.x -= 10;
+                        d.run_count++;
+                    }
+                    // else if(d.x > 200 && Boss_delay >= 0){
+                    //     isbossidle = true;
+                    //     // isbosswalk = false;
+                    // }
+                    else{
+                        isbossidle = true;
+                        isbosswalk = false;
+                        isbossaction = false;
+                        d.idle_count++;
+                    }
+                    
+                }
+                
                 else{
                     isbossidle = true;
                     d.idle_count++;
-
                 }
-                repaint();
+                // repaint();
             }
         }
     });
@@ -76,10 +106,17 @@ public class GamePanel extends JPanel implements ActionListener{
             while(true){
                 if(isbossaction){
                     if(isbossattack && Boss_delay < 0){
+                        isbossidle = false;
+                        isbosswalk = false;
                         d.attack_count++;
-                        if(d.attack_count >= 10){
-                            Boss_delay = 20;
+                        if(d.attack_count == d.D_attack.length-5){
+                            // p.HP -= d.ATK;
+                            p.getDamage(d.ATK);
+                        }
+                        if(d.attack_count >= d.D_attack.length){
+                            Boss_delay = 40;
                             isbossattack = false;
+                            isbossidle = true;
                         }
                     }
                 }
@@ -88,7 +125,7 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
                 catch(Exception e){}
                 
-                repaint();
+                // repaint();
             }
         }
     });
@@ -98,37 +135,32 @@ public class GamePanel extends JPanel implements ActionListener{
             while(true){
                 // isbossidle = true;
                 if(Boss_delay >= 0){
-                    if((d.x - p.x) > 100){ //ถ้ายังอยู่ในระยะboss ** กันเฟรมมันรันเร็ว
+                    if((d.x - p.x) > Boss_atk_range){ //ถ้ายังอยู่ในระยะboss ** กันเฟรมมันรันเร็ว
                         Boss_delay -= 1;
-                        repaint();
+                        // repaint();
                     }
                     else{// ถ้าไม่ได้อยู่ในระยะboss
                         d.idle_count++;
                         Boss_delay -= 1;
-                        repaint();
+                        // repaint();
                     }
                     
                 }
-                else if((d.x - p.x) <= 100){ // ถ้า
+                else if((d.x - p.x) <= Boss_atk_range){
                     isbossattack = true;
                     isbossaction = true;
                     isbossidle = false;
                 }
-                // if(isbossaction){
-                //     if(isbossattack && Boss_delay < 0){
-                //         d.attack_count++;
-                //         if(d.attack_count >= 10){
-                //             Boss_delay = 5;
-                //             isbossattack = false;
-                //         }
-                //     }
-                // }
+                else if((d.x - p.x) > Boss_atk_range){
+
+                }
+              
                 try{
                     Thread.sleep(100);
                 }
                 catch(Exception e){}
                 
-                repaint();
+                // repaint();
             }
         }
     });
@@ -136,11 +168,31 @@ public class GamePanel extends JPanel implements ActionListener{
     Thread time = new Thread(new Runnable(){
         public void run(){
             while(true){
-            try{
-                Thread.sleep(10);
+            if(p.HP <= 0){
+                isidle = false;
+                isaction = true;              
+                try{
+                    Thread.sleep(200);
+                }
+                catch(Exception e){}
+                if(p.death_count == p.P_death.length-1){
+                    try{
+                        Thread.sleep(1000000);
+                    }
+                    catch(Exception e){}
+                }
+                repaint();
             }
-            catch(Exception e){}
-            repaint();
+            else{
+                try{
+                    Thread.sleep(10);
+                }
+                catch(Exception e){}
+                repaint();
+            }
+            
+            
+            
             
             }
         }
@@ -148,15 +200,16 @@ public class GamePanel extends JPanel implements ActionListener{
 
     
 
-    Thread walk = new Thread(new Runnable(){
+    Thread Bosswalk = new Thread(new Runnable(){
         public void run(){
             while(true){
-                if(iswalk){
+                if(isbosswalk){
                     try{
                         Thread.sleep(100);
                     }
                     catch(Exception e){}
-                    repaint();
+                    d.run_count++;
+                    // repaint();
                 }
             }
         }
@@ -171,9 +224,9 @@ public class GamePanel extends JPanel implements ActionListener{
                 catch(Exception e){}
                 if(isattack){
                     p.attack_count++;
-                    repaint();
+                    // repaint();
                 }
-                if(p.attack_count >= 8){ // reset after attack
+                if(p.attack_count >= p.P_attack.length){ // reset after attack
                     p.attack_count = 0;
                     isidle = true;
                     isattack = false;
@@ -181,6 +234,40 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
             }
         }
+    });
+
+    Thread Death = new Thread(new Runnable() {
+        public void run(){
+            try{
+                Thread.sleep(200);
+            }
+            catch(Exception e){}
+            if(p.HP <= 0){
+                p.roll_count++;
+                // repaint();
+            }
+            
+        } 
+    });
+
+    Thread Roll = new Thread(new Runnable() {
+        public void run(){
+            try{
+                Thread.sleep(200);
+            }
+            catch(Exception e){}
+            if(isroll){
+                p.roll_count++;
+                System.out.println("1");
+                // repaint();
+            }
+            if(p.roll_count >= p.P_roll.length){
+                p.roll_count = 0;
+                isidle = true;
+                isaction = false;
+                isroll = false;
+            }
+        } 
     });
 
     Thread Block = new Thread(new Runnable() {
@@ -192,9 +279,9 @@ public class GamePanel extends JPanel implements ActionListener{
             catch(Exception e){}
             if(isblock){
                 p.block_count++;
-                repaint();
+                // repaint();
             }
-            if(p.block_count >= 8){
+            if(p.block_count >= p.P_block.length){
                 p.block_count = 0;
             }
         }
@@ -202,6 +289,12 @@ public class GamePanel extends JPanel implements ActionListener{
     });
 
     public GamePanel(){
+        p.setHP(400);
+        p.setATK(20);
+        p.x = 0;
+
+        d.setHP(800);
+        d.setATK(30);
         d.x = 500;
 
         this.setFocusable(true);
@@ -223,19 +316,40 @@ public class GamePanel extends JPanel implements ActionListener{
                         }
                         
                     }
-                    else if(a == KeyEvent.VK_D){
+                    if(a == KeyEvent.VK_D){
                         if(p.x <= getWidth()){
                             p.x += 10;
                             p.run_count++;
                         }
-                        
                     }
-                    if(p.run_count >= 9){
+                    
+                    if(a == KeyEvent.VK_E){
+                        // isaction = false;
+                        isroll = true;
+                        // isidle = false;
+                        p.x += 5;
+                        // System.out.println("asgd");
+                    }
+
+                    if(p.run_count >= p.P_run.length){
                         p.run_count = 0;
                     }
                 }
+
+                // if(isaction != true){
+                //     int a = e.getKeyCode();
+                //     if(a == KeyEvent.VK_E){
+                //         isaction = true;
+                //         isroll = true;
+                //         isidle = false;
+                //         p.x += 5;
+                //         System.out.println("asgd");
+                //     }
+                // }
+                
                 
             }
+
 
             public void keyReleased(KeyEvent e){
                 iswalk = false;
@@ -260,7 +374,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
             public void mousePressed(MouseEvent e){ // guarding
                 if(e.getButton() == MouseEvent.BUTTON3){
-                    if(isaction != true){
+                    if(!isaction){
                         isblock = true;
                         isidle = false;
                         isaction = true;
@@ -271,7 +385,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
             public void mouseReleased(MouseEvent e){ 
                 if(e.getButton() == MouseEvent.BUTTON3){
-                    if(isaction != true || isblock == true){
+                    if(!isaction || isblock){
                         isblock = false;
                         isidle = true;
                         isaction = false;
@@ -281,11 +395,14 @@ public class GamePanel extends JPanel implements ActionListener{
             }
         });
         
+
+        
         time.start();
         actortime.start();
         attack.start();
+        Roll.start();
         Block.start();
-        walk.start();
+        Bosswalk.start();
         Boss.start();
         delay.start();
         Boss_attack.start();
@@ -294,59 +411,89 @@ public class GamePanel extends JPanel implements ActionListener{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         g.drawImage(bgimg.getImage(), 0, 0, getWidth(), getHeight(), this);
-        
-        if(iswalk){
-            g.drawImage(p.P_run[p.run_count].getImage(), p.x, 440, 300, 165, this);
-        }
-        else if(isidle){
-            if(p.idle_count >= 8){
-                p.idle_count = 0;
+        g.setColor(Color.green);
+        g.setFont(new Font("Hobo Std", Font.BOLD, 40));
+        g.drawString("HP : "+p.HP, 100, 100);
+        g.setColor(Color.red);
+        g.drawString("Boss : "+d.HP, 900, 100);
+
+        if(p.HP <= 0){
+            if(p.death_count < p.P_death.length-1){
+                p.death_count++;
             }
-            g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
-            
+            g.drawImage(p.P_death[p.death_count].getImage(), p.x, 440, 300, 165, this);
         }
+        else{
+            if(iswalk){
+                g.drawImage(p.P_run[p.run_count].getImage(), p.x, 440, 300, 165, this);
+            }
+            else if(isidle){
+                if(p.idle_count >= p.P_idle.length){
+                    p.idle_count = 0;
+                }
+                g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
 
-        if(isattack){
-            g.drawImage(p.P_attack[p.attack_count].getImage(), p.x, 440, 300, 165, this);
-            
+            }
+
+            else if(isattack){
+                g.drawImage(p.P_attack[p.attack_count].getImage(), p.x, 440, 300, 165, this);
+
+            }
+            else if(isblock){
+                g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
+            }
+            else if(isroll){
+                if(p.roll_count >= p.P_roll.length){
+                    p.roll_count = 0;
+                }
+                g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
+            }
         }
-        if(isblock){
-            g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
-        }
+        
 
 
-        if((d.x - p.x) <= 100){// เมื่อเข้ามาในระยะ boss จะโจมตี
+        if((d.x - p.x) <= Boss_atk_range){// เมื่อเข้ามาในระยะ boss จะโจมตี
             
-            if(Boss_delay >= 0){
-                if(d.idle_count >= 8){
+            if(Boss_delay >= 0){ //ช่วงboss delay
+                if(d.idle_count >= d.D_idle.length){
                     d.idle_count = 0;
                 }
                 isbossidle = true;
                 // g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
             }
             else{
-                if(d.attack_count >= 10){
+                if(d.attack_count >= d.D_attack.length){
                     d.attack_count = 0;
                 }
                 g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
             }
         }
         if(isbossidle){
-            if(d.idle_count >= 8){
+            if(d.idle_count >= d.D_idle.length){
                 d.idle_count = 0;
             }
             g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
         }
-        if(isbossattack){// ถ้าboss อยู่ในช่วงโจมตี จะทำการโจมตีให้จบอนิเมชั่น
-            if((d.x - p.x) > 100){
-                if(d.attack_count >= 10){
-                    d.attack_count = 0;
+        if(isbossattack){
+            if((d.x - p.x) > Boss_atk_range){  // ถ้าเกินระยะ boss โจมตี
+                if(Boss_delay < 0){ // ถ้าboss อยู่ในช่วงโจมตี จะทำการโจมตีให้จบอนิเมชั่น
+                    isbossidle = false;
+                    if(d.attack_count >= d.D_attack.length){
+                        d.attack_count = 0;
+                    }
+                    g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
                 }
-                g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
+                
             }
         }
-        
+        if(isbosswalk){
 
+            if(d.run_count >= d.D_run.length){
+                d.run_count = 0;
+            }
+            g.drawImage(d.D_run[d.run_count].getImage(), d.x, 105, 700, 500, this);
+        }
+        
     }
 
 
