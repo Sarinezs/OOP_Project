@@ -7,10 +7,16 @@ public class Death_Bringer  extends entity{
     public int idle_count;
     public int run_count;
     public int attack_count;
-    public int block_count;
+    public int hurt_count;
+    public int cast_count;
+    public int death_count;
+
     public ImageIcon[] D_idle = new ImageIcon[8];
     public ImageIcon[] D_run = new ImageIcon[8];
     public ImageIcon[] D_attack = new ImageIcon[10];
+    public ImageIcon[] D_hurt = new ImageIcon[3];
+    public ImageIcon[] D_cast = new ImageIcon[9];
+    public ImageIcon[] D_death = new ImageIcon[10];
 
     // public void setHP(int hp){
     //     this.HP = hp;
@@ -36,5 +42,18 @@ public class Death_Bringer  extends entity{
         for(int i = 0; i<D_run.length; i++){
             D_run[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Walk/Bringer-of-Death_Walk_"+(i+1)+".png"));
         }
+
+        for(int i = 0; i<D_hurt.length; i++){
+            D_hurt[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Hurt/Bringer-of-Death_Hurt_"+(i+1)+".png"));
+        }
+
+        for(int i = 0; i<D_cast.length; i++){
+            D_cast[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Cast/Bringer-of-Death_Cast_"+(i+1)+".png"));
+        }
+
+        for(int i = 0; i<D_death.length; i++){
+            D_death[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Death/Bringer-of-Death_Death_"+(i+1)+".png"));
+        }
+        
     }
 }
