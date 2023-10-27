@@ -13,9 +13,8 @@ import javax.swing.*;
 
 public class GamePanel extends JPanel implements ActionListener{
     public ImageIcon bgimg = new ImageIcon(this.getClass().getResource("Entity/Image/background.png"));
+    public ImageIcon bgimg1 = new ImageIcon(this.getClass().getResource("Entity/Image/background1.png"));
 
-    
-    
     Player p = new Player();
     
     boolean iswalk = false;
@@ -24,9 +23,11 @@ public class GamePanel extends JPanel implements ActionListener{
     boolean ishurt = false;
     boolean isdeath = false;
     boolean isroll = false;
+    boolean isreverseroll = false;
     boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
     boolean isidle = true;
     int P_delay = -1;
+    int P_rollduration;
     
 
     Death_Bringer d = new Death_Bringer();
@@ -35,8 +36,8 @@ public class GamePanel extends JPanel implements ActionListener{
     boolean isbosswalk = false;
     boolean isbossidle = true;
     boolean willcontinue = false;
-    int Boss_atk_range = 100;
-    int Boss_vision = 150;
+    int Boss_atk_range = -100;
+    int Boss_vision = 0;
     int Boss_delay = -1;
 
     JLabel P_HP = new JLabel(String.valueOf(p.HP));
@@ -114,14 +115,14 @@ public class GamePanel extends JPanel implements ActionListener{
                         if(d.attack_count == d.D_attack.length-5){
                             if(isblock){
                                 // ishurt = true;
-                                P_delay = 3;
+                                P_delay = 5;
                                 // isidle = false;
                                 // isaction = true;
                                 p.getDamage(d.ATK - p.def);
                             }
                             else{
                                 // ishurt = true;
-                                P_delay = 3;
+                                P_delay = 5;
                                 // isidle = false;
                                 // isaction = true;
                                 p.getDamage(d.ATK);
@@ -197,6 +198,24 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
                 repaint();
             }
+            else if(isroll){
+                try{
+                    Thread.sleep(100);
+                }
+                catch(Exception e){}
+                p.x += 5;
+
+                repaint();
+            }
+            else if(isreverseroll){
+                try{
+                    Thread.sleep(100);
+                }
+                catch(Exception e){}
+                p.x -= 5;
+
+                repaint();
+            }
 
             else{
                 try{
@@ -256,15 +275,17 @@ public class GamePanel extends JPanel implements ActionListener{
 
     Thread Hurt = new Thread(new Runnable() {
         public void run(){
-            if(P_delay >= 0){
-                P_delay -= 1;
-                System.out.println(P_delay);
+            while(true){
+                if(P_delay >= 0){
+                    P_delay -= 1;
+                    System.out.println(P_delay);
+                }
+                repaint();
+                try{
+                    Thread.sleep(100);
+                }
+                catch(Exception e){}
             }
-            repaint();
-            try{
-                Thread.sleep(100);
-            }
-            catch(Exception e){}
             
             
             
@@ -273,21 +294,29 @@ public class GamePanel extends JPanel implements ActionListener{
 
     Thread Roll = new Thread(new Runnable() {
         public void run(){
-            try{
-                Thread.sleep(200);
+            while(true){
+                try{
+                    Thread.sleep(100);
+                }
+                catch(Exception e){}
+                if(isroll){
+                    p.roll_count++;
+                    // P_rollduration--;
+                    // System.out.println("1");
+                    // repaint();
+                }
+                else if(isreverseroll){
+                    p.roll_count++;
+
+                }
+                if(p.roll_count >= p.P_roll.length){
+                    p.roll_count = 0;
+                    isidle = true;
+                    isaction = false;
+                    isroll = false;
+                }
             }
-            catch(Exception e){}
-            if(isroll){
-                p.roll_count++;
-                System.out.println("1");
-                // repaint();
-            }
-            if(p.roll_count >= p.P_roll.length){
-                p.roll_count = 0;
-                isidle = true;
-                isaction = false;
-                isroll = false;
-            }
+            
         } 
     });
 
@@ -311,12 +340,12 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public GamePanel(){
         p.setHP(500);
-        p.setATK(40);
+        p.setATK(900);
         p.setdef(10);
         p.x = 0;
 
         d.setHP(1000);
-        d.setATK(30);
+        d.setATK(40);
         d.x = 500;
 
         this.setFocusable(true);
@@ -346,10 +375,16 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     
                     if(a == KeyEvent.VK_E){
-                        // isaction = false;
+                        isaction = false;
                         isroll = true;
-                        // isidle = false;
-                        p.x += 5;
+                        isidle = false;
+                        // System.out.println("asgd");
+                    }
+
+                    if(a == KeyEvent.VK_Q){
+                        isaction = false;
+                        isreverseroll = true;
+                        isidle = false;
                         // System.out.println("asgd");
                     }
 
@@ -435,7 +470,12 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
-        g.drawImage(bgimg.getImage(), 0, 0, getWidth(), getHeight(), this);
+        if(d.HP <= 500){
+            g.drawImage(bgimg1.getImage(), 0, 0, getWidth(), getHeight(), this);
+        }
+        else{
+            g.drawImage(bgimg.getImage(), 0, 0, getWidth(), getHeight(), this);
+        }
         g.setColor(Color.green);
         g.setFont(new Font("Hobo Std", Font.BOLD, 40));
         g.drawString("HP : "+p.HP, 100, 100);
@@ -475,16 +515,26 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
             }
             else if(isroll){
-                // if(p.roll_count < p.P_roll.length-1){
-                //     p.roll_count++;
-                //     if(p.roll_count >= p.P_roll.length){
-                //        p.roll_count = 0;
-                //     }
-                // }
-
-                    // g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
+                if(p.roll_count < p.P_roll.length-1){
+                    if(p.roll_count >= p.P_roll.length){
+                       p.roll_count = 0;
+                       isroll = false;
+                    }
+                }
+                    g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
                 
             }
+            else if(isreverseroll){
+                if(p.roll_count < p.P_roll.length-1){
+                    if(p.roll_count >= p.P_roll.length){
+                       p.roll_count = 0;
+                       isreverseroll = false;
+                    }
+                }
+                    g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
+                
+            }
+
         }
         
 
