@@ -1,9 +1,8 @@
 import javax.swing.ImageIcon;
 
 public class Player extends entity{
-    // public int HP;
-    // public int ATK;
-    // public int x;
+    public int def;
+   
     public int idle_count;
     public int run_count;
     public int attack_count;
@@ -18,6 +17,10 @@ public class Player extends entity{
     public ImageIcon[] P_death = new ImageIcon[10];
     public ImageIcon[] P_hurt = new ImageIcon[3];
     public ImageIcon[] P_roll = new ImageIcon[9];
+
+    public void setdef(int d){
+        this.def = d;
+    }
 
     // public void setHP(int hp){
     //     this.HP = hp;
@@ -36,7 +39,7 @@ public class Player extends entity{
     public Player(){
         for(int i = 0; i<P_idle.length; i++){
             P_idle[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Hero/Idle/HeroKnight_Idle_"+(i)+".png"));   
-        }                                                          //Entity/Image/Hero/Idle/HeroKnight_Idle_0.png
+        }                                                          
 
         for(int i = 0; i<P_attack.length; i++){
             P_attack[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Hero/Attack3/HeroKnight_Attack3_"+(i)+".png"));

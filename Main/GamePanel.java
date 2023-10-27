@@ -26,6 +26,7 @@ public class GamePanel extends JPanel implements ActionListener{
     boolean isroll = false;
     boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
     boolean isidle = true;
+    int P_delay = -1;
     
 
     Death_Bringer d = new Death_Bringer();
@@ -34,8 +35,8 @@ public class GamePanel extends JPanel implements ActionListener{
     boolean isbosswalk = false;
     boolean isbossidle = true;
     boolean willcontinue = false;
-    int Boss_atk_range = 0;
-    int Boss_vision = 30;
+    int Boss_atk_range = 100;
+    int Boss_vision = 150;
     int Boss_delay = -1;
 
     JLabel P_HP = new JLabel(String.valueOf(p.HP));
@@ -50,6 +51,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             catch(Exception e){}
             p.idle_count++;
+
           
             // repaint();
             
@@ -110,11 +112,23 @@ public class GamePanel extends JPanel implements ActionListener{
                         isbosswalk = false;
                         d.attack_count++;
                         if(d.attack_count == d.D_attack.length-5){
-                            // p.HP -= d.ATK;
-                            p.getDamage(d.ATK);
+                            if(isblock){
+                                // ishurt = true;
+                                P_delay = 3;
+                                // isidle = false;
+                                // isaction = true;
+                                p.getDamage(d.ATK - p.def);
+                            }
+                            else{
+                                // ishurt = true;
+                                P_delay = 3;
+                                // isidle = false;
+                                // isaction = true;
+                                p.getDamage(d.ATK);
+                            }
                         }
                         if(d.attack_count >= d.D_attack.length){
-                            Boss_delay = 40;
+                            Boss_delay = 30;
                             isbossattack = false;
                             isbossidle = true;
                         }
@@ -151,9 +165,9 @@ public class GamePanel extends JPanel implements ActionListener{
                     isbossaction = true;
                     isbossidle = false;
                 }
-                else if((d.x - p.x) > Boss_atk_range){
+                // else if((d.x - p.x) > Boss_atk_range){
 
-                }
+                // }
               
                 try{
                     Thread.sleep(100);
@@ -183,6 +197,7 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
                 repaint();
             }
+
             else{
                 try{
                     Thread.sleep(10);
@@ -224,6 +239,9 @@ public class GamePanel extends JPanel implements ActionListener{
                 catch(Exception e){}
                 if(isattack){
                     p.attack_count++;
+                    if(p.attack_count == p.P_attack.length-6){
+                        d.getDamage(p.ATK);
+                    }
                     // repaint();
                 }
                 if(p.attack_count >= p.P_attack.length){ // reset after attack
@@ -236,16 +254,19 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     });
 
-    Thread Death = new Thread(new Runnable() {
+    Thread Hurt = new Thread(new Runnable() {
         public void run(){
+            if(P_delay >= 0){
+                P_delay -= 1;
+                System.out.println(P_delay);
+            }
+            repaint();
             try{
-                Thread.sleep(200);
+                Thread.sleep(100);
             }
             catch(Exception e){}
-            if(p.HP <= 0){
-                p.roll_count++;
-                // repaint();
-            }
+            
+            
             
         } 
     });
@@ -289,11 +310,12 @@ public class GamePanel extends JPanel implements ActionListener{
     });
 
     public GamePanel(){
-        p.setHP(400);
-        p.setATK(20);
+        p.setHP(500);
+        p.setATK(40);
+        p.setdef(10);
         p.x = 0;
 
-        d.setHP(800);
+        d.setHP(1000);
         d.setATK(30);
         d.x = 500;
 
@@ -367,6 +389,7 @@ public class GamePanel extends JPanel implements ActionListener{
                         isattack = true;
                         isidle = false;
                         isaction = true;
+                        ishurt = false;
                     }
                     
                 }
@@ -378,6 +401,7 @@ public class GamePanel extends JPanel implements ActionListener{
                         isblock = true;
                         isidle = false;
                         isaction = true;
+                        ishurt = false;
                     }
                     
                 }
@@ -401,6 +425,7 @@ public class GamePanel extends JPanel implements ActionListener{
         actortime.start();
         attack.start();
         Roll.start();
+        Hurt.start();
         Block.start();
         Bosswalk.start();
         Boss.start();
@@ -434,19 +459,31 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
 
             }
+            // else if(P_delay >= 0){
+            //     if(p.hurt_count >= p.P_hurt.length){
+            //         p.hurt_count = 0;
+            //     }
+            //     g.drawImage(p.P_hurt[p.hurt_count].getImage(), p.x, 440, 300, 165, this);
+            // }
 
             else if(isattack){
                 g.drawImage(p.P_attack[p.attack_count].getImage(), p.x, 440, 300, 165, this);
 
             }
             else if(isblock){
+
                 g.drawImage(p.P_block[p.block_count].getImage(), p.x, 440, 300, 165, this);
             }
             else if(isroll){
-                if(p.roll_count >= p.P_roll.length){
-                    p.roll_count = 0;
-                }
-                g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
+                // if(p.roll_count < p.P_roll.length-1){
+                //     p.roll_count++;
+                //     if(p.roll_count >= p.P_roll.length){
+                //        p.roll_count = 0;
+                //     }
+                // }
+
+                    // g.drawImage(p.P_roll[p.roll_count].getImage(), p.x, 440, 300, 165, this);
+                
             }
         }
         

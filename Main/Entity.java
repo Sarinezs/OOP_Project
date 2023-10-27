@@ -13,7 +13,13 @@ public class entity {
     }
 
     public void getDamage(int atk){
-        this.HP -= atk;
+        if((this.HP - atk) < 0){
+            setHP(0);
+        }
+        else{
+            this.HP -= atk;
+        }
+        // this.HP -= atk;
     }
 
 }
