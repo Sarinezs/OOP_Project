@@ -112,20 +112,24 @@ public class GamePanel extends JPanel implements ActionListener{
                         isbossidle = false;
                         isbosswalk = false;
                         d.attack_count++;
-                        if(d.attack_count == d.D_attack.length-5){
+                        if(d.attack_count == d.D_attack.length-3){
                             if(isblock){
-                                // ishurt = true;
-                                P_delay = 5;
-                                // isidle = false;
-                                // isaction = true;
-                                p.getDamage(d.ATK - p.def);
+
                             }
                             else{
-                                // ishurt = true;
-                                P_delay = 5;
-                                // isidle = false;
-                                // isaction = true;
-                                p.getDamage(d.ATK);
+                                if(!isroll && !isreverseroll){
+                                    // P_delay = p.P_hurt.length-1;
+                                    p.getDamage(d.ATK);
+                                    ishurt = true;
+                                    iswalk = false;
+                                    isidle = false;
+                                }
+                                if(p.hurt_count >= p.P_hurt.length){
+                                    ishurt = false;
+                                    iswalk = false;
+                                    isidle = true;
+                                }
+
                             }
                         }
                         if(d.attack_count >= d.D_attack.length){
@@ -200,23 +204,22 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             else if(isroll){
                 try{
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 }
                 catch(Exception e){}
-                p.x += 5;
+                p.x += 4;
 
                 repaint();
             }
             else if(isreverseroll){
                 try{
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 }
                 catch(Exception e){}
-                p.x -= 5;
+                p.x -= 4;
 
                 repaint();
             }
-
             else{
                 try{
                     Thread.sleep(10);
@@ -276,11 +279,16 @@ public class GamePanel extends JPanel implements ActionListener{
     Thread Hurt = new Thread(new Runnable() {
         public void run(){
             while(true){
-                if(P_delay >= 0){
-                    P_delay -= 1;
-                    System.out.println(P_delay);
+                if(ishurt){
+                    p.hurt_count++;
+                    if(p.hurt_count >= p.P_hurt.length){
+                        p.hurt_count = 0;
+                        ishurt = false;
+                        iswalk = false;
+                        isidle = true;
+                    }
                 }
-                repaint();
+                // repaint();
                 try{
                     Thread.sleep(100);
                 }
@@ -301,20 +309,26 @@ public class GamePanel extends JPanel implements ActionListener{
                 catch(Exception e){}
                 if(isroll){
                     p.roll_count++;
-                    // P_rollduration--;
-                    // System.out.println("1");
-                    // repaint();
+                    if(p.roll_count >= p.P_roll.length-1){
+                        p.roll_count = 0;
+                        isidle = true;
+                        isaction = false;
+                        isroll = false;
+                        isreverseroll = false;
+                    }
                 }
-                else if(isreverseroll){
-                    p.roll_count++;
-
+                
+                if(isreverseroll){
+                    p.roll_count--;
+                    if(p.roll_count < 0){
+                        p.roll_count = 0;
+                        isidle = true;
+                        isaction = false;
+                        isroll = false;
+                        isreverseroll = false;
+                    }
                 }
-                if(p.roll_count >= p.P_roll.length){
-                    p.roll_count = 0;
-                    isidle = true;
-                    isaction = false;
-                    isroll = false;
-                }
+                
             }
             
         } 
@@ -345,7 +359,7 @@ public class GamePanel extends JPanel implements ActionListener{
         p.x = 0;
 
         d.setHP(1000);
-        d.setATK(40);
+        d.setATK(1);
         d.x = 500;
 
         this.setFocusable(true);
@@ -382,6 +396,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
 
                     if(a == KeyEvent.VK_Q){
+                        p.roll_count = p.P_roll.length-1;
                         isaction = false;
                         isreverseroll = true;
                         isidle = false;
@@ -499,12 +514,12 @@ public class GamePanel extends JPanel implements ActionListener{
                 g.drawImage(p.P_idle[p.idle_count].getImage(), p.x, 440, 300, 165, this);
 
             }
-            // else if(P_delay >= 0){
-            //     if(p.hurt_count >= p.P_hurt.length){
-            //         p.hurt_count = 0;
-            //     }
-            //     g.drawImage(p.P_hurt[p.hurt_count].getImage(), p.x, 440, 300, 165, this);
-            // }
+            else if(ishurt){
+                if(p.hurt_count >= p.P_hurt.length){
+                    p.hurt_count = 0;
+                }
+                g.drawImage(p.P_hurt[p.hurt_count].getImage(), p.x, 440, 300, 165, this);
+            }
 
             else if(isattack){
                 g.drawImage(p.P_attack[p.attack_count].getImage(), p.x, 440, 300, 165, this);
@@ -525,8 +540,8 @@ public class GamePanel extends JPanel implements ActionListener{
                 
             }
             else if(isreverseroll){
-                if(p.roll_count < p.P_roll.length-1){
-                    if(p.roll_count >= p.P_roll.length){
+                if(p.roll_count > p.P_roll.length-1){
+                    if(p.roll_count < p.P_roll.length){
                        p.roll_count = 0;
                        isreverseroll = false;
                     }
