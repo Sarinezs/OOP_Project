@@ -547,11 +547,11 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public GamePanel(){
         p.setHP(500);
-        p.setATK(500);
-        p.setdef(10);
+        p.setATK(50);
+        p.setdef(20);
         p.x = 0;
 
-        d.setHP(500);
+        d.setHP(Boss_HP);
         d.setATK(50);
         d.x = 500;
 
@@ -692,7 +692,7 @@ public class GamePanel extends JPanel implements ActionListener{
         g.drawString("HP : "+p.HP, 100, 100);
         g.setColor(Color.red);
         g.drawString("Boss : "+d.HP, 900, 100);
-        g.drawRect(spell_position+250, 300,130, 300); // กรอบวัดตำแหน่งวัตถุ
+        // g.drawRect(spell_position+250, 300,130, 300); // กรอบวัดตำแหน่งวัตถุ
 
         if(p.HP > 0 && d.HP <= 0){
             if(d.death_count == d.D_attack.length-1){
