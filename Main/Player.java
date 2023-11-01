@@ -1,3 +1,5 @@
+import java.awt.geom.Rectangle2D;
+
 import javax.swing.ImageIcon;
 
 public class Player extends entity{
@@ -64,8 +66,14 @@ public class Player extends entity{
         for(int i = 0; i<P_roll.length; i++){
             P_roll[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Hero/Roll/HeroKnight_Roll_"+(i)+".png"));
         }
-
-        
-
     }
+
+    public Rectangle2D Player_HitBlock(){
+        return(new Rectangle2D.Double(x+100, 480,90, 120));
+    }
+
+    public Rectangle2D Player_areaAttack(){
+        return(new Rectangle2D.Double(x+150, 480,150, 120));
+    }
+
 }

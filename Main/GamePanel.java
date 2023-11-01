@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 
 import javax.swing.*;
 
@@ -35,9 +36,11 @@ public class GamePanel extends JPanel implements ActionListener{
     boolean isbossaction = false;
     boolean isbosswalk = false;
     boolean isbossidle = true;
+    boolean isspell = false;
     boolean willcontinue = false;
-    int Boss_atk_range = -100;
+    int Boss_atk_range = -50;
     int Boss_atk_range_phrase2 = 1000;
+    int spell_position;
 
     int Boss_vision = 0;
     int Boss_delay = -1;
@@ -74,7 +77,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     catch(Exception e){}
                     // System.out.println("KK");
-                    repaint();
+                    // repaint();
                 }
                 
                 else{
@@ -82,57 +85,101 @@ public class GamePanel extends JPanel implements ActionListener{
                         Thread.sleep(100);
                     }
                     catch(Exception e){}
-                    if(d.HP <= Boss_HP/2){
 
-                    }
-                    // else{
-                    //     if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
-                    //         isbossattack = true;
-                    //         isbossaction = true;
-                    //         isbossidle = false;
-                    //         isbosswalk = false;
+                    if(d.HP <= Boss_HP/2){
+                        if((d.x - p.x) <= Boss_atk_range_phrase2 && p.HP > 0 && Boss_delay >= 0){
+                            isbossattack = false;
+                            isbossaction = false;
+                            isbossidle = true;
+                            isbosswalk = true;
+                            d.idle_count++;
+                            // System.out.println(d.idle_count);
                             
-                    //     }
-                    //     else if((d.x - p.x) <= Boss_vision && !isbossattack && p.HP > 0){
-                    //         isbosswalk = true;
-                    //         isbossidle = false;
-                    //         isbossaction = true;
-                    //         if(d.x < Boss_vision){
-                    //             if(d.x < 100){
-                    //                 isbosswalk = false;
-                    //                 isbossidle = true;
-                    //                 isbossaction = false;
-                    //             }
-                    //             else{
-                    //                 d.x -= 10;
-                    //                 d.run_count++;
-                    //             }
-                    //         }
-                    //         else{
-                    //             isbossidle = true;
-                    //             isbosswalk = false;
-                    //             isbossaction = false;
-                    //             d.idle_count++;
-                    //         }
+                        }
+                        else if((d.x - p.x) <= Boss_atk_range_phrase2 && p.HP > 0){
+                            isbossattack = true;
+                            isbossaction = true;
+                            isbossidle = false;
+                            isbosswalk = false;
+                            // d.idle_count++;
+                            // System.out.println(d.idle_count);
+                        }
+                        else if((d.x - p.x) <= Boss_vision && !isbossattack && p.HP > 0){
+                            isbosswalk = true;
+                            isbossidle = false;
+                            isbossaction = true;
+                            if(d.x < Boss_vision){
+                                if(d.x < 100){
+                                    isbosswalk = false;
+                                    isbossidle = true;
+                                    isbossaction = false;
+                                }
+                                else{
+                                    d.x -= 10;
+                                    d.run_count++;
+                                }
+                            }
+                            else{
+                                isbossidle = true;
+                                isbosswalk = false;
+                                isbossaction = false;
+                                // d.idle_count++;
+                            }
                     
-                    //     }
-                    //     else{
-                    //         isbossidle = true;
-                    //         d.idle_count++;
-                    //     }
-                    // }
-                    // if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
-                    //     isbossattack = true;
-                    //     isbossaction = true;
-                    //     isbossidle = false;
-                    //     isbosswalk = false;
-                        
-                    // }
-                   
-                    else{
-                        isbossidle = true;
-                        d.idle_count++;
+                        }
+                        // else{
+                        //     isbossidle = true;
+                        //     d.idle_count++;
+                        // }
                     }
+                    else{
+                        if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
+                            isbossattack = true;
+                            isbossaction = true;
+                            isbossidle = false;
+                            isbosswalk = false;
+                            
+                        }
+                        else if((d.x - p.x) <= Boss_vision && !isbossattack && p.HP > 0){
+                            isbosswalk = true;
+                            isbossidle = false;
+                            isbossaction = true;
+                            if(d.x < Boss_vision){
+                                if(d.x < 100){
+                                    isbosswalk = false;
+                                    isbossidle = true;
+                                    isbossaction = false;
+                                }
+                                else{
+                                    d.x -= 10;
+                                    d.run_count++;
+                                }
+                            }
+                            else{
+                                isbossidle = true;
+                                isbosswalk = false;
+                                isbossaction = false;
+                                d.idle_count++;
+                            }
+                    
+                        }
+                        else{
+                            isbossidle = true;
+                            d.idle_count++;
+                        }
+                    }
+                    if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
+                        isbossattack = true;
+                        isbossaction = true;
+                        isbossidle = false;
+                        isbosswalk = false;
+                        
+                    }
+                   
+                    // else{
+                    //     isbossidle = true;
+                    //     d.idle_count++;
+                    // }
                 // repaint();
                 }
                 
@@ -140,45 +187,103 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     });
 
+    Thread Boss_spell = new Thread(new Runnable() {
+        public void run(){
+            while(true){
+                if(isspell){
+                    try{
+                        Thread.sleep(150);
+                    }
+                    catch(Exception e){}
+                    d.spell_count++;
+                    System.out.println(d.spell_count);
+                }
+                
+            }
+        } 
+    });
+
     Thread Boss_attack = new Thread(new Runnable() {
         public void run(){
             while(true){
                 
-                if(isbossaction){
-                    if(isbossattack && Boss_delay < 0){
-                        isbossidle = false;
-                        isbosswalk = false;
-                        d.attack_count++;
-                        if(d.attack_count == d.D_attack.length-3){
-                            if(isblock){
-                                p.getDamage(d.ATK - p.def);
+                if(d.HP <= Boss_HP/2){
+                    if(isbossaction){
+                        if(isbossattack && Boss_delay < 0){
+                            isbossidle = false;
+                            isbosswalk = false;
+                            d.cast_count++;
+                            // d.spell_count++;
+                            if(d.cast_count >= d.D_cast.length-1){
+                                if(d.spell_count == d.D_spell.length-3){
+                                    if(IsHit(d.Boss_areaAttack(), p.Player_HitBlock())){
+                                        if(isblock){
+                                            p.getDamage(d.ATK - p.def);
+                                        }
+                                        else{
+                                            if(!isroll && !isreverseroll){
+                                                p.getDamage(d.ATK);
+                                                ishurt = true;
+                                                iswalk = false;
+                                                isidle = false;
+                                            }
+                                            if(p.hurt_count >= p.P_hurt.length){
+                                                ishurt = false;
+                                                iswalk = false;
+                                                isidle = true;
+                                            }
+                                        }
+                                    }
+                                }
+                                
                             }
-                            else{
-                                if(!isroll && !isreverseroll){
-                                    // P_delay = p.P_hurt.length-1;
-                                    p.getDamage(d.ATK);
-                                    ishurt = true;
-                                    iswalk = false;
-                                    isidle = false;
-                                }
-                                if(p.hurt_count >= p.P_hurt.length){
-                                    ishurt = false;
-                                    iswalk = false;
-                                    isidle = true;
-                                }
+                            if(d.cast_count >= d.D_cast.length){
+                                Boss_delay = 50;
+                                isbossattack = false;
+                                isbossidle = true;
                             }
                         }
-                        if(d.attack_count >= d.D_attack.length){
-                            Boss_delay = 30;
-                            isbossattack = false;
-                            isbossidle = true;
+                    }
+                }
+                else{
+                    if(isbossaction){
+                        if(isbossattack && Boss_delay < 0){
+                            isbossidle = false;
+                            isbosswalk = false;
+                            d.attack_count++;
+                            if(d.attack_count == d.D_attack.length-3){
+                                // if(IsHit(d.Boss_areaAttack(), p.Player_HitBlock())){
+                                //     if(isblock){
+                                //         p.getDamage(d.ATK - p.def);
+                                //     }
+                                //     else{
+                                //         if(!isroll && !isreverseroll){
+                                //             // P_delay = p.P_hurt.length-1;
+                                //             p.getDamage(d.ATK);
+                                //             ishurt = true;
+                                //             iswalk = false;
+                                //             isidle = false;
+                                //         }
+                                //         if(p.hurt_count >= p.P_hurt.length){
+                                //             ishurt = false;
+                                //             iswalk = false;
+                                //             isidle = true;
+                                //         }
+                                //     }
+                                // }
+                            }
+                            if(d.attack_count >= d.D_attack.length){
+                                Boss_delay = 30;
+                                isbossattack = false;
+                                isbossidle = true;
+                            }
                         }
+                    }
                 }
                 
-            }
                 
                 try{
-                    Thread.sleep(100);
+                    Thread.sleep(150);
                 }
                 catch(Exception e){}
                 
@@ -192,15 +297,27 @@ public class GamePanel extends JPanel implements ActionListener{
             while(true){
                 // isbossidle = true;
                 if(Boss_delay >= 0){
-                    if((d.x - p.x) > Boss_atk_range){ //ถ้ายังอยู่ในระยะboss ** กันเฟรมมันรันเร็ว
-                        Boss_delay -= 1;
-                        // repaint();
+                    if(d.HP <= Boss_HP/2){ // boss phrase 2
+                        if((d.x - p.x) > Boss_atk_range_phrase2){ // ถ้าไม่ได้อยู่ในระยะboss
+                            Boss_delay -= 1;
+                        }
+                        else{//ถ้ายังอยู่ในระยะboss ** กันเฟรมมันรันเร็ว
+                            Boss_delay -= 1;
+                            d.spell_count++;
+                            // System.out.println(Boss_delay);
+
+                        }
                     }
-                    else{// ถ้าไม่ได้อยู่ในระยะboss
-                        d.idle_count++;
-                        Boss_delay -= 1;
-                        // repaint();
+                    else{
+                        if((d.x - p.x) > Boss_atk_range){
+                            Boss_delay -= 1;
+                        }
+                        else{// ถ้าไม่ได้อยู่ในระยะboss
+                            d.idle_count++;
+                            Boss_delay -= 1;
+                        }
                     }
+                    
                     
                 }
                 if(d.HP <= Boss_HP/2){
@@ -319,10 +436,11 @@ public class GamePanel extends JPanel implements ActionListener{
                 catch(Exception e){}
                 if(isattack){
                     p.attack_count++;
-                    if(p.attack_count == p.P_attack.length-6){
-                        d.getDamage(p.ATK);
+                    if(IsHit(p.Player_areaAttack(), d.Boss_HitBlock())){
+                        if(p.attack_count == p.P_attack.length-6){
+                            d.getDamage(p.ATK);
+                        }
                     }
-                    // repaint();
                 }
                 if(p.attack_count >= p.P_attack.length){ // reset after attack
                     p.attack_count = 0;
@@ -414,8 +532,8 @@ public class GamePanel extends JPanel implements ActionListener{
         p.setdef(10);
         p.x = 0;
 
-        d.setHP(Boss_HP);
-        d.setATK(500);
+        d.setHP(500);
+        d.setATK(10);
         d.x = 500;
 
         this.setFocusable(true);
@@ -537,10 +655,13 @@ public class GamePanel extends JPanel implements ActionListener{
         Boss.start();
         delay.start();
         Boss_attack.start();
+        Boss_spell.start();
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
+        
+
         if(d.HP <= Boss_HP/2){
             g.drawImage(bgimg1.getImage(), 0, 0, getWidth(), getHeight(), this);
         }
@@ -552,6 +673,7 @@ public class GamePanel extends JPanel implements ActionListener{
         g.drawString("HP : "+p.HP, 100, 100);
         g.setColor(Color.red);
         g.drawString("Boss : "+d.HP, 900, 100);
+        // g.drawRect(d.x+200, 300,300, 300); // กรอบวัดตำแหน่งวัตถุ
 
         if(p.HP > 0 && d.HP <= 0){
             if(d.death_count == d.D_attack.length-1){
@@ -631,8 +753,39 @@ public class GamePanel extends JPanel implements ActionListener{
         else{
             if(d.HP <= Boss_HP/2){
                 if((d.x - p.x) <= Boss_atk_range_phrase2){
-
+                    if(Boss_delay >= 0){
+                        if(d.idle_count >= d.D_idle.length){
+                            d.idle_count = 0;
+                        }
+                        if(Boss_delay > 14){
+                            // d.spell_count++;
+                            if(d.spell_count >= d.D_spell.length){
+                                d.spell_count = 0;
+                            }spell_position = p.x;
+                            g.drawImage(d.D_spell[d.spell_count].getImage(), spell_position, 105, 700, 500, this);
+                            System.out.println(d.spell_count);
+                        }
+                    }
+                    else{
+                        if(d.cast_count >= d.D_cast.length){
+                            d.cast_count = 0;
+                            // isspell =  true;
+                        }
+                        g.drawImage(d.D_cast[d.cast_count].getImage(), d.x, 105, 700, 500, this);
+                        
+                        // if(d.spell_count >= d.D_spell.length){
+                        //     d.spell_count = 0;
+                        // }
+                        // g.drawImage(d.D_spell[d.spell_count].getImage(), p.x, 105, 700, 500, this);
+                    }
+                    // if(isbossidle){
+                    //     if(d.idle_count >= d.D_idle.length){
+                    //         d.idle_count = 0;
+                    //     }
+                    //     g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
+                    // }
                 }
+                 
             }
             else{
                 if((d.x - p.x) <= Boss_atk_range){// เมื่อเข้ามาในระยะ boss จะโจมตี
@@ -649,16 +802,8 @@ public class GamePanel extends JPanel implements ActionListener{
                         }
                         g.drawImage(d.D_attack[d.attack_count].getImage(), d.x, 105, 700, 500, this);
                     }
-            }
-            }
-            
-            if(isbossidle){
-                if(d.idle_count >= d.D_idle.length){
-                    d.idle_count = 0;
                 }
-                g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
-            }
-            if(isbossattack){
+                if(isbossattack){
                 if((d.x - p.x) > Boss_atk_range){  // ถ้าเกินระยะ boss โจมตี
                     if(Boss_delay < 0){ // ถ้าboss อยู่ในช่วงโจมตี จะทำการโจมตีให้จบอนิเมชั่น
                         isbossidle = false;
@@ -677,9 +822,22 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
                 g.drawImage(d.D_run[d.run_count].getImage(), d.x, 105, 700, 500, this);
             }
+            }
+            
+            if(isbossidle){
+                if(d.idle_count >= d.D_idle.length){
+                    d.idle_count = 0;
+                }
+                g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
+            }
+            
         }
         
         
+    }
+
+    public boolean IsHit(Rectangle2D P, Rectangle2D D) {
+        return (P.intersects(D));
     }
 
 

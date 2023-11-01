@@ -1,3 +1,5 @@
+import java.awt.geom.Rectangle2D;
+
 import javax.swing.ImageIcon;
 
 public class Death_Bringer  extends entity{
@@ -10,6 +12,7 @@ public class Death_Bringer  extends entity{
     public int hurt_count;
     public int cast_count;
     public int death_count;
+    public int spell_count;
 
     public ImageIcon[] D_idle = new ImageIcon[8];
     public ImageIcon[] D_run = new ImageIcon[8];
@@ -17,6 +20,7 @@ public class Death_Bringer  extends entity{
     public ImageIcon[] D_hurt = new ImageIcon[3];
     public ImageIcon[] D_cast = new ImageIcon[9];
     public ImageIcon[] D_death = new ImageIcon[10];
+    public ImageIcon[] D_spell = new ImageIcon[16];
 
     // public void setHP(int hp){
     //     this.HP = hp;
@@ -54,6 +58,18 @@ public class Death_Bringer  extends entity{
         for(int i = 0; i<D_death.length; i++){
             D_death[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Death/Bringer-of-Death_Death_"+(i+1)+".png"));
         }
+
+        for(int i = 0; i<D_spell.length; i++){
+            D_spell[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Boss/Spell/Bringer-of-Death_Spell_"+(i+1)+".png"));
+        }
         
+    }
+
+    public Rectangle2D Boss_HitBlock(){
+        return(new Rectangle2D.Double(x+420, 300,200, 300));
+    }
+
+    public Rectangle2D Boss_areaAttack(){
+        return(new Rectangle2D.Double(x+200, 300,300, 300));
     }
 }
