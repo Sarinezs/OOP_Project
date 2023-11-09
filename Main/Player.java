@@ -24,20 +24,6 @@ public class Player extends entity{
         this.def = d;
     }
 
-    // public void setHP(int hp){
-    //     this.HP = hp;
-    // }
-
-    // public void setATK(int atk){
-    //     this.ATK = atk;
-    // }
-
-    // public void getDamage(int atk){
-    //     this.HP -= atk;
-    // }
-
-    
-    
     public Player(){
         for(int i = 0; i<P_idle.length; i++){
             P_idle[i] = new ImageIcon(this.getClass().getResource("Entity/Image/Hero/Idle/HeroKnight_Idle_"+(i)+".png"));   

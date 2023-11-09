@@ -1,57 +1,46 @@
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
-
 import javax.swing.*;
 
 public class GamePanel extends JPanel implements ActionListener{
     public ImageIcon bgimg = new ImageIcon(this.getClass().getResource("Entity/Image/background.png"));
     public ImageIcon bgimg1 = new ImageIcon(this.getClass().getResource("Entity/Image/background1.png"));
 
-    Player p = new Player();
+    public Player p = new Player();
+    public boolean iswalk = false;
+    public boolean isattack = false;
+    public boolean isblock = false;
+    public boolean ishurt = false;
+    public boolean isdeath = false;
+    public boolean isroll = false;
+    public boolean isreverseroll = false;
+    public boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
+    public boolean isidle = true;
+    public int P_delay = -1;
+    public int P_rollduration;
     
-    boolean iswalk = false;
-    boolean isattack = false;
-    boolean isblock = false;
-    boolean ishurt = false;
-    boolean isdeath = false;
-    boolean isroll = false;
-    boolean isreverseroll = false;
-    boolean isaction = false; // check ว่าตัวหลักกำลังใช้ท่าไรอยู่ไหม
-    boolean isidle = true;
-    int P_delay = -1;
-    int P_rollduration;
-    
 
-    Death_Bringer d = new Death_Bringer();
-    boolean isbossattack = false;
-    boolean isbossaction = false;
-    boolean isbosswalk = false;
-    boolean isbossidle = true;
-    boolean isspell = false;
-    boolean willcontinue = false;
-    int Boss_atk_range = -50;
-    int Boss_atk_range_phrase2 = 1000;
-    int spell_position;
+    public Death_Bringer d = new Death_Bringer();
+    public boolean isbossattack = false;
+    public boolean isbossaction = false;
+    public boolean isbosswalk = false;
+    public boolean isbossidle = true;
+    public boolean isspell = false;
+    public boolean willcontinue = false;
+    public int Boss_atk_range = -50;
+    public int Boss_atk_range_phrase2 = 1000;
+    public int spell_position;
+    public int Boss_vision = 0;
+    public int Boss_delay = -1;
+    public int Boss_HP = 1000;
+    public int Boss_phrase2 = Boss_HP / 2;
 
-    int Boss_vision = 0;
-    int Boss_delay = -1;
-    int Boss_HP = 1000;
-    int Boss_phrase2 = Boss_HP / 2;
-
-    JLabel P_HP = new JLabel(String.valueOf(p.HP));
-    JLabel D_HP = new JLabel(String.valueOf(d.HP));
+    public JLabel P_HP = new JLabel(String.valueOf(p.HP));
+    public JLabel D_HP = new JLabel(String.valueOf(d.HP));
 
 
-    Thread actortime = new Thread(new Runnable() {
+    public Thread actortime = new Thread(new Runnable() {
        public void run(){
         while(true){
             try{
@@ -59,15 +48,11 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             catch(Exception e){}
             p.idle_count++;
-
-          
-            // repaint();
-            
         }
        } 
     });
 
-    Thread Boss = new Thread(new Runnable(){
+    public Thread Boss = new Thread(new Runnable(){
         public void run(){
             while(true){
                 
@@ -76,8 +61,6 @@ public class GamePanel extends JPanel implements ActionListener{
                         Thread.sleep(10000);
                     }
                     catch(Exception e){}
-                    // System.out.println("KK");
-                    // repaint();
                 }
                 
                 else{
@@ -93,7 +76,6 @@ public class GamePanel extends JPanel implements ActionListener{
                             isbossidle = true;
                             isbosswalk = true;
                             d.idle_count++;
-                            // System.out.println(d.idle_count);
                             
                         }
                         else if((d.x - p.x) <= Boss_atk_range_phrase2 && p.HP > 0){
@@ -101,8 +83,6 @@ public class GamePanel extends JPanel implements ActionListener{
                             isbossaction = true;
                             isbossidle = false;
                             isbosswalk = false;
-                            // d.idle_count++;
-                            // System.out.println(d.idle_count);
                         }
                         else if((d.x - p.x) <= Boss_vision && !isbossattack && p.HP > 0){
                             isbosswalk = true;
@@ -123,14 +103,10 @@ public class GamePanel extends JPanel implements ActionListener{
                                 isbossidle = true;
                                 isbosswalk = false;
                                 isbossaction = false;
-                                // d.idle_count++;
                             }
                     
                         }
-                        // else{
-                        //     isbossidle = true;
-                        //     d.idle_count++;
-                        // }
+                        
                     }
                     else{
                         if((d.x - p.x) <= Boss_atk_range && p.HP > 0){
@@ -176,34 +152,13 @@ public class GamePanel extends JPanel implements ActionListener{
                         
                     }
                    
-                    // else{
-                    //     isbossidle = true;
-                    //     d.idle_count++;
-                    // }
-                // repaint();
                 }
                 
             }
         }
     });
 
-    Thread Boss_spell = new Thread(new Runnable() {
-        public void run(){
-            // while(true){
-            //     if(isspell){
-            //         try{
-            //             Thread.sleep(150);
-            //         }
-            //         catch(Exception e){}
-            //         d.spell_count++;
-            //         System.out.println(d.spell_count);
-            //     }
-                
-            // }
-        } 
-    });
-
-    Thread Boss_attack = new Thread(new Runnable() {
+    public Thread Boss_attack = new Thread(new Runnable() {
         public void run(){
             while(true){
                 
@@ -213,35 +168,12 @@ public class GamePanel extends JPanel implements ActionListener{
                             isbossidle = false;
                             isbosswalk = false;
                             d.cast_count++;
-                            // if(d.cast_count >= d.D_cast.length-1){
-                                if(d.spell_count == 7){
-                                    // if(IsHit(d.Boss_areaAttack(), p.Player_HitBlock())){
-                                    //     if(isblock){
-                                    //         p.getDamage(d.ATK - p.def);
-                                    //     }
-                                    //     else{
-                                    //         if(!isroll && !isreverseroll){
-                                    //             p.getDamage(d.ATK);
-                                    //             ishurt = true;
-                                    //             iswalk = false;
-                                    //             isidle = false;
-                                    //         }
-                                    //         if(p.hurt_count >= p.P_hurt.length){
-                                    //             ishurt = false;
-                                    //             iswalk = false;
-                                    //             isidle = true;
-                                    //         }
-                                    //     }
-                                    // }
-                                }
-                                
-                            // }
+                            
                             if(d.cast_count >= d.D_cast.length){
                                 Boss_delay = 30;
                                 isbossattack = false;
                                 isbossidle = true;
-                                spell_position = (int) ((Math.random()*200)-200+p.x);
-                                // System.out.println(spell_position);
+                                spell_position = p.x -190;
                             }
                         }
                     }
@@ -287,12 +219,11 @@ public class GamePanel extends JPanel implements ActionListener{
                 }
                 catch(Exception e){}
                 
-                // repaint();
             }
         }
     });
 
-    Thread delay = new Thread(new Runnable() {
+    public Thread delay = new Thread(new Runnable() {
         public void run(){
             while(true){
                 // isbossidle = true;
@@ -306,7 +237,6 @@ public class GamePanel extends JPanel implements ActionListener{
                             d.spell_count++;
                             if(d.spell_count == 7){ // spell after cast
                                 if(IsHit(p.Player_HitBlock(), Boss_Spell_areaAttack())){
-                                    // System.out.println(spell_position);
                                     if(isblock){
                                         p.getDamage(d.ATK*3 - p.def);
                                     }
@@ -340,29 +270,25 @@ public class GamePanel extends JPanel implements ActionListener{
                     
                     
                 }
-                if(d.HP <= Boss_HP/2){
-
-                }
+                
                 else{
                     if((d.x - p.x) <= Boss_atk_range){
                         isbossattack = true;
                         isbossaction = true;
                         isbossidle = false;
+                    }
                 }
-                }
-                
               
                 try{
                     Thread.sleep(100);
                 }
                 catch(Exception e){}
                 
-                // repaint();
             }
         }
     });
 
-    Thread time = new Thread(new Runnable(){
+    public Thread time = new Thread(new Runnable(){
         public void run(){
             while(true){
             if(p.HP <= 0){
@@ -421,17 +347,14 @@ public class GamePanel extends JPanel implements ActionListener{
                 catch(Exception e){}
                 repaint();
             }
-            
-            
-            
-            
+        
             }
         }
     });
 
     
 
-    Thread Bosswalk = new Thread(new Runnable(){
+    public Thread Bosswalk = new Thread(new Runnable(){
         public void run(){
             while(true){
                 if(isbosswalk){
@@ -440,13 +363,12 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     catch(Exception e){}
                     d.run_count++;
-                    // repaint();
                 }
             }
         }
     });
 
-    Thread attack = new Thread(new Runnable() {
+    public Thread attack = new Thread(new Runnable() {
         public void run(){
             while(true){
                 try{
@@ -471,7 +393,7 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     });
 
-    Thread Hurt = new Thread(new Runnable() {
+    public Thread Hurt = new Thread(new Runnable() {
         public void run(){
             while(true){
                 if(ishurt){
@@ -492,7 +414,7 @@ public class GamePanel extends JPanel implements ActionListener{
         } 
     });
 
-    Thread Roll = new Thread(new Runnable() {
+    public Thread Roll = new Thread(new Runnable() {
         public void run(){
             while(true){
                 try{
@@ -527,7 +449,7 @@ public class GamePanel extends JPanel implements ActionListener{
         } 
     });
 
-    Thread Block = new Thread(new Runnable() {
+    public Thread Block = new Thread(new Runnable() {
        public void run(){
         while(true){
             try{
@@ -536,7 +458,6 @@ public class GamePanel extends JPanel implements ActionListener{
             catch(Exception e){}
             if(isblock){
                 p.block_count++;
-                // repaint();
             }
             if(p.block_count >= p.P_block.length){
                 p.block_count = 0;
@@ -547,7 +468,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
     public GamePanel(){
         p.setHP(500);
-        p.setATK(50);
+        p.setATK(500);
         p.setdef(20);
         p.x = 0;
 
@@ -585,7 +506,6 @@ public class GamePanel extends JPanel implements ActionListener{
                         isaction = true;
                         isroll = true;
                         isidle = false;
-                        // System.out.println("asgd");
                     }
 
                     if(a == KeyEvent.VK_Q){
@@ -593,25 +513,12 @@ public class GamePanel extends JPanel implements ActionListener{
                         isaction = true;
                         isreverseroll = true;
                         isidle = false;
-                        // System.out.println("asgd");
                     }
 
                     if(p.run_count >= p.P_run.length){
                         p.run_count = 0;
                     }
-                }
-
-                // if(isaction != true){
-                //     int a = e.getKeyCode();
-                //     if(a == KeyEvent.VK_E){
-                //         isaction = true;
-                //         isroll = true;
-                //         isidle = false;
-                //         p.x += 5;
-                //         System.out.println("asgd");
-                //     }
-                // }
-                
+                }       
                 
             }
 
@@ -674,7 +581,6 @@ public class GamePanel extends JPanel implements ActionListener{
         Boss.start();
         delay.start();
         Boss_attack.start();
-        // Boss_spell.start();
     }
 
     public void paintComponent(Graphics g){
@@ -778,32 +684,19 @@ public class GamePanel extends JPanel implements ActionListener{
                         }
                         g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
                         if(Boss_delay > 14){
-                            // d.spell_count++;
                             if(d.spell_count >= d.D_spell.length){
                                 d.spell_count = 0;
                             }
                             g.drawImage(d.D_spell[d.spell_count].getImage(), spell_position, 105, 700, 500, this);
-                            // System.out.println(spell_position);
                         }
                     }
                     else{
                         if(d.cast_count >= d.D_cast.length){
                             d.cast_count = 0;
-                            // isspell =  true;
                         }
                         g.drawImage(d.D_cast[d.cast_count].getImage(), d.x, 105, 700, 500, this);
                         
-                        // if(d.spell_count >= d.D_spell.length){
-                        //     d.spell_count = 0;
-                        // }
-                        // g.drawImage(d.D_spell[d.spell_count].getImage(), p.x, 105, 700, 500, this);
                     }
-                    // if(isbossidle){
-                    //     if(d.idle_count >= d.D_idle.length){
-                    //         d.idle_count = 0;
-                    //     }
-                    //     g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
-                    // }
                 }
                  
             }
@@ -814,7 +707,6 @@ public class GamePanel extends JPanel implements ActionListener{
                             d.idle_count = 0;
                         }
                         isbossidle = true;
-                        // g.drawImage(d.D_idle[d.idle_count].getImage(), d.x, 105, 700, 500, this);
                     }
                     else{
                         if(d.attack_count >= d.D_attack.length){

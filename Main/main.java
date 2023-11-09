@@ -1,22 +1,15 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
-public class main extends JFrame implements ActionListener{
+public class main extends JFrame{
     // GamePanel gamepanel = GamePanel();
     
-    main(){
+    public main(){
         add(new GamePanel());
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
-
     public static void main(String[] args){
-        // GamePanel o = new GamePanel();
+        GamePanel o = new GamePanel();
         
         main frame = new main();
         
