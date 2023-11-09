@@ -32,7 +32,7 @@ public class GamePanel extends JPanel implements ActionListener{
     public int Boss_atk_range_phrase2 = 1000;
     public int spell_position;
     public int Boss_vision = 0;
-    public int Boss_delay = -1;
+    public int Boss_delay = 0;
     public int Boss_HP = 1000;
     public int Boss_phrase2 = Boss_HP / 2;
 
