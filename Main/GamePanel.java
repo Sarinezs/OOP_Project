@@ -58,7 +58,7 @@ public class GamePanel extends JPanel implements ActionListener{
                 
                 if(d.HP <= 0){
                     try{
-                        Thread.sleep(10000);
+                        Thread.sleep(100);
                     }
                     catch(Exception e){}
                 }
@@ -69,7 +69,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     }
                     catch(Exception e){}
 
-                    if(d.HP <= Boss_HP/2){
+                    if(d.HP <= Boss_HP/2){ // boss เข้า phrase 2
                         if((d.x - p.x) <= Boss_atk_range_phrase2 && p.HP > 0 && Boss_delay >= 0){
                             isbossattack = false;
                             isbossaction = false;
@@ -170,7 +170,7 @@ public class GamePanel extends JPanel implements ActionListener{
                             d.cast_count++;
                             
                             if(d.cast_count >= d.D_cast.length){
-                                Boss_delay = 30;
+                                Boss_delay = 30; // เวลาหน่วงหลังจากบอสโจมตี
                                 isbossattack = false;
                                 isbossidle = true;
                                 spell_position = p.x -190;
@@ -186,11 +186,11 @@ public class GamePanel extends JPanel implements ActionListener{
                             d.attack_count++;
                             if(d.attack_count == d.D_attack.length-3){
                                 if(IsHit(d.Boss_areaAttack(), p.Player_HitBlock())){
-                                    if(isblock){
+                                    if(isblock){ // ถ้ายกโล่แล้วโดนตีจะผู้เล่นจะได้รับดาเมจลดลง
                                         p.getDamage(d.ATK - p.def);
                                     }
                                     else{
-                                        if(!isroll && !isreverseroll){
+                                        if(!isroll && !isreverseroll){ // ถ้ากลิ้งระหว่างโดนตีจะไม่โดนดาเมจ
                                             p.getDamage(d.ATK);
                                             ishurt = true;
                                             iswalk = false;
@@ -205,7 +205,7 @@ public class GamePanel extends JPanel implements ActionListener{
                                 }
                             }
                             if(d.attack_count >= d.D_attack.length){
-                                Boss_delay = 30;
+                                Boss_delay = 30; //เวลาหน่วงหลังจากบอสตี
                                 isbossattack = false;
                                 isbossidle = true;
                             }
@@ -352,22 +352,6 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     });
 
-    
-
-    public Thread Bosswalk = new Thread(new Runnable(){
-        public void run(){
-            while(true){
-                if(isbosswalk){
-                    try{
-                        Thread.sleep(100);
-                    }
-                    catch(Exception e){}
-                    d.run_count++;
-                }
-            }
-        }
-    });
-
     public Thread attack = new Thread(new Runnable() {
         public void run(){
             while(true){
@@ -393,7 +377,7 @@ public class GamePanel extends JPanel implements ActionListener{
         }
     });
 
-    public Thread Hurt = new Thread(new Runnable() {
+    public Thread Hurt = new Thread(new Runnable() {// animation hurt
         public void run(){
             while(true){
                 if(ishurt){
@@ -414,7 +398,7 @@ public class GamePanel extends JPanel implements ActionListener{
         } 
     });
 
-    public Thread Roll = new Thread(new Runnable() {
+    public Thread Roll = new Thread(new Runnable() { // animation roll
         public void run(){
             while(true){
                 try{
@@ -449,7 +433,7 @@ public class GamePanel extends JPanel implements ActionListener{
         } 
     });
 
-    public Thread Block = new Thread(new Runnable() {
+    public Thread Block = new Thread(new Runnable() { // animation block
        public void run(){
         while(true){
             try{
@@ -485,7 +469,7 @@ public class GamePanel extends JPanel implements ActionListener{
                     iswalk = true;
                     isaction = true;
                     int a = e.getKeyCode();
-                    if(a == KeyEvent.VK_A){
+                    if(a == KeyEvent.VK_A){ 
                         if(p.x >= -40){
                             p.x -= 10;
                             p.run_count++;    
@@ -534,7 +518,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
         this.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e){
-                if(e.getButton() == MouseEvent.BUTTON1){
+                if(e.getButton() == MouseEvent.BUTTON1){ // left click
                     if(!isaction){ // can't attack during guarding
                         isattack = true;
                         isidle = false;
@@ -546,7 +530,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
 
             public void mousePressed(MouseEvent e){ // guarding
-                if(e.getButton() == MouseEvent.BUTTON3){
+                if(e.getButton() == MouseEvent.BUTTON3){ // right click
                     if(!isaction){
                         isblock = true;
                         isidle = false;
@@ -558,7 +542,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
 
             public void mouseReleased(MouseEvent e){ 
-                if(e.getButton() == MouseEvent.BUTTON3){
+                if(e.getButton() == MouseEvent.BUTTON3){ //when release ยกโล่ลง
                     if(!isaction || isblock){
                         isblock = false;
                         isidle = true;
@@ -571,16 +555,17 @@ public class GamePanel extends JPanel implements ActionListener{
         
 
         
-        time.start();
-        actortime.start();
-        attack.start();
-        Roll.start();
-        Hurt.start();
-        Block.start();
-        Bosswalk.start();
+        time.start(); // เวลาหลักของเกม
+
+        actortime.start(); // animation player's idle
+        attack.start(); // animation player's attack
+        Roll.start(); // animation player's roll
+        Hurt.start(); // animation player's hurt
+        Block.start(); // animation player's block
+
         Boss.start();
-        delay.start();
-        Boss_attack.start();
+        delay.start(); // ถ้าไม่มีบรรทัดนี้ attackไม่ได้
+        Boss_attack.start(); // animation boss's attack
     }
 
     public void paintComponent(Graphics g){
@@ -668,7 +653,7 @@ public class GamePanel extends JPanel implements ActionListener{
 
         }
         
-        if(d.HP <= 0){
+        if(d.HP <= 0){ // bossตายเมื่อ hp = 0
             if(d.death_count < d.D_death.length-1){
                 d.death_count++;
             }
@@ -736,7 +721,7 @@ public class GamePanel extends JPanel implements ActionListener{
             }
             }
             
-            if(isbossidle){
+            if(isbossidle){ // gen ภาพเมื่อบอสอยู่เฉยๆ
                 if(d.idle_count >= d.D_idle.length){
                     d.idle_count = 0;
                 }
